@@ -1,6 +1,6 @@
 from torch import nn
 
-from conv2D_batch_norm import *
+from segmentation.conv2D_batch_norm import *
 
 
 class ResidualBlockPSP(nn.Sequential):

@@ -1,10 +1,10 @@
 """PSPNet network module"""
 import torchinfo
 
-from feature_map_convolution import FeatureMap_convolution
-from residual_block_PSP import ResidualBlockPSP
-from pyramid_pooling import PyramidPooling
-from decorder_and_auxloss import *
+from segmentation.feature_map_convolution import FeatureMap_convolution
+from segmentation.residual_block_PSP import ResidualBlockPSP
+from segmentation.pyramid_pooling import PyramidPooling
+from segmentation.decorder_and_auxloss import *
 
 
 class PSPNet(nn.Module):

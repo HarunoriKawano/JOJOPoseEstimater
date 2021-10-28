@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 import copy
 
-from conv2D_batch_norm import conv2DBatchNormRelu
+from segmentation.conv2D_batch_norm import conv2DBatchNormRelu
 
 
 class PyramidPooling(nn.Module):

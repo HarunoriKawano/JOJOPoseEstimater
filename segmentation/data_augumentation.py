@@ -42,7 +42,7 @@ class Scale(object):
 
         # アノテーションのリサイズ
         anno_class_img = anno_class_img.resize(
-            (scaled_w, scaled_h), Image.BICUBIC)
+            (scaled_w, scaled_h), Image.NEAREST)
 
         # 画像を元の大きさに
         # 切り出し位置を求める
@@ -73,7 +73,7 @@ class Scale(object):
             img.paste(img_original, (pad_width_left, pad_height_top))
 
             anno_class_img = Image.new(
-                anno_class_img.mode, (width, height), (0))
+                anno_class_img.mode, (width, height), 0)
             anno_class_img.paste(anno_class_img_original,
                                  (pad_width_left, pad_height_top))
 
@@ -91,7 +91,7 @@ class RandomRotation(object):
 
         # 回転
         img = img.rotate(rotate_angle, Image.BILINEAR)
-        anno_class_img = anno_class_img.rotate(rotate_angle, Image.BILINEAR)
+        anno_class_img = anno_class_img.rotate(rotate_angle, Image.NEAREST)
 
         return img, anno_class_img
 
@@ -120,7 +120,7 @@ class Resize(object):
         img = img.resize((self.input_size, self.input_size),
                          Image.BICUBIC)
         anno_class_img = anno_class_img.resize(
-            (self.input_size, self.input_size), Image.BICUBIC)
+            (self.input_size, self.input_size), Image.NEAREST)
 
         return img, anno_class_img
 

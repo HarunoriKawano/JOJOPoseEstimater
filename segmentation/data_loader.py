@@ -1,51 +1,49 @@
 """data loader programs"""
 import itertools
+
+import torch
 from PIL import Image
 import torch.utils.data as data
 from pycocotools.coco import COCO
 
-from data_augumentation import Compose, Scale, RandomRotation, RandomMirror, Resize, Normalize_Tensor
+from segmentation.data_augumentation import Compose, Scale, RandomRotation, RandomMirror, Resize, Normalize_Tensor
 
 
-def make_datapath_list(json_path, data_path):
+def make_datapath_list(text_path, data_path):
     """
+        Parameters
+        ----------
+        text_path: str
+            path for text data file
+        data_path: str
+            path for image data file
+        Returns
+        -------
+        train_img, train_anno, val_img, val_anno: tuple
+            A list containing the path to the data
+        """
 
-    Parameters
-    ----------
-    json_path: str
-        path for json data file
-    data_path: str
-        path for image data file
-    Returns
-    -------
-    train_img_list, train_anno_list, val_img_list, val_anno_list: tuple
-        A list containing the path to the data
-    """
+    with open(text_path + 'train.txt', 'r') as f:
+        train_files = f.read().split("\n")
 
-    # get the coco objects
-    train_json = "instances_train2017.json"
-    val_json = "instances_val2017.json"
-    coco_train = COCO(json_path + train_json)
-    coco_val = COCO(json_path + val_json)
+    with open(text_path + 'val.txt', 'r') as f:
+        val_files = f.read().split("\n")
 
-    # get image data
-    train_person_ids = coco_train.getCatIds(catNms=['person'])
-    val_person_ids = coco_val.getCatIds(catNms=['person'])
+    train_img = []
+    train_anno = []
 
-    train_img_ids = coco_train.getImgIds(catIds=train_person_ids)
-    val_img_ids = coco_val.getImgIds(catIds=val_person_ids)
+    for file in train_files:
+        train_img.append(data_path + 'images/' + file + '.png')
+        train_anno.append(data_path + 'masks/' + file + '.png')
 
-    train_file_names = list(itertools.chain.from_iterable([coco_train.loadImgs(target) for target in train_img_ids]))
-    val_file_names = list(itertools.chain.from_iterable([coco_val.loadImgs(target) for target in val_img_ids]))
+    val_img = []
+    val_anno = []
 
-    train_img_data = [data_path + "train2017/" + target["file_name"] for target in train_file_names]
-    val_img_data = [data_path + "val2017/" + target["file_name"] for target in val_file_names]
+    for file in val_files:
+        val_img.append(data_path + 'images/' + file + '.png')
+        val_anno.append(data_path + 'masks/' + file + '.png')
 
-    # get annotation data
-    train_anno_data = [data_path + "train_person_segmentation2017/" + target["file_name"] for target in train_file_names]
-    val_anno_data = [data_path + "val_person_segmentation2017/" + target["file_name"] for target in val_file_names]
-
-    return train_img_data, train_anno_data, val_img_data, val_anno_data
+    return train_img, train_anno, val_img, val_anno
 
 
 class DataTransform:
@@ -130,10 +128,9 @@ class VOCDataset(data.Dataset):
         # load annotation images
         anno_file_path = self.anno_list[index]
         anno_class_img = Image.open(anno_file_path)
+        anno_class_img = anno_class_img.convert('L')
 
         # preform pretreatment
         img, anno_class_img = self.transform(self.phase, img, anno_class_img)
-
-        anno_class_img = anno_class_img <= 128
 
         return img, anno_class_img

@@ -1,6 +1,6 @@
 from torch import nn
 
-from conv2D_batch_norm import conv2DBatchNormRelu
+from segmentation.conv2D_batch_norm import conv2DBatchNormRelu
 
 
 class FeatureMap_convolution(nn.Module):

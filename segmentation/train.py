@@ -1,13 +1,13 @@
 import torch.utils.data as data
 import torch
 from torch import nn
-from torch import optim
 import math
 import time
 import pandas as pd
+import torch_optimizer as optim
 
-from data_loader import make_datapath_list, DataTransform, VOCDataset
-from PSPNet import PSPNet, PSPLoss
+from segmentation.data_loader import make_datapath_list, DataTransform, VOCDataset
+from segmentation.PSPNet import PSPNet, PSPLoss
 
 
 # make a function to train the model
@@ -66,7 +66,7 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
 
                 images = images.to(device)
                 anno_class_images = anno_class_images.to(device)
-                anno_class_images = anno_class_images > 128
+                anno_class_images = anno_class_images != 0
 
                 # Update parameters in multiple minibatches
                 if phase == 'train' and count == 0:
@@ -113,17 +113,20 @@ def train_model(net, dataloaders_dict, criterion, optimizer, num_epochs):
                      'val_loss': epoch_val_loss / num_val_imgs}
         logs.append(log_epoch)
         df = pd.DataFrame(logs)
-        df.to_csv("log_output.csv")
+        df.to_csv("log_output2.csv")
 
         # Save the last network
-        torch.save(net.to('cpu').state_dict(), 'weights/pspnet50_' + str(epoch + 1) + '.pth')
+        if (epoch + 1) % 10 == 0:
+            torch.save(net.to('cpu').state_dict(), 'weights/pspnet50_2_' + str(epoch + 1) + '.pth')
+            net.to(device)
 
 
 if __name__ == '__main__':
     # make file path list
-    json_path = "D:\\LearningData/COCO2017/annotations/"
-    data_path = "D:\\LearningData/COCO2017/"
-    train_img_list, train_anno_list, val_img_list, val_anno_list = make_datapath_list(json_path=json_path,
+
+    text_path = "D:\\LearningData/supervisely_person_clean_2667_img/"
+    data_path = "D:\\LearningData/supervisely_person_clean_2667_img/"
+    train_img_list, train_anno_list, val_img_list, val_anno_list = make_datapath_list(text_path=text_path,
                                                                                       data_path=data_path)
 
     # make Dataset
@@ -169,34 +172,16 @@ if __name__ == '__main__':
     net.decode_feature.classification.apply(weights_init)
     net.aux.classification.apply(weights_init)
 
+    net.load_state_dict(torch.load('weights/pspnet50_100.pth'))
     print('ネットワーク設定完了 : 学習済みの重みをロードしました')
 
     # setting up the loss function
     criterion = PSPLoss(aux_weight=0.4)
 
     # setting up the learning late
-    optimizer = optim.Adam([
-        {'params': net.feature_conv.parameters(), 'lr': 1e-3},
-        {'params': net.feature_res_1.parameters(), 'lr': 1e-3},
-        {'params': net.feature_res_2.parameters(), 'lr': 1e-3},
-        {'params': net.feature_dilated_res_1.parameters(), 'lr': 1e-3},
-        {'params': net.feature_dilated_res_2.parameters(), 'lr': 1e-3},
-        {'params': net.pyramid_pooling.parameters(), 'lr': 1e-3},
-        {'params': net.decode_feature.parameters(), 'lr': 1e-2},
-        {'params': net.aux.parameters(), 'lr': 1e-2},
-    ])
-
-    """
-    # setting scheduler
-    def lambda_epoch(epoch):
-        max_epoch = 100
-        return math.pow((1 - epoch / max_epoch), 0.9)
-
-
-    scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_epoch)
-    """
+    optimizer = optim.RAdam(net.parameters(), lr=0.001)
 
     # Do training and validation
-    num_epochs = 5
+    num_epochs = 50
     print(net)
     train_model(net, dataloaders_dict, criterion, optimizer, num_epochs=num_epochs)
