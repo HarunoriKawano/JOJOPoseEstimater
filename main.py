@@ -44,7 +44,7 @@ def cv2pil(image):
 
 if __name__ == '__main__':
     # Initial values
-    image_path = "data/target4.jpg"
+    image_path = "data/test.jpg"
     image_height_scale = 1080
 
     image = cv2.imread(image_path)
