@@ -18,7 +18,7 @@ def pil2cv(image):
     return new_image
 
 
-def make_clipped_person(image, height, width):
+def make_clipped_person(image, height, width, device):
     # Cut out the target.
     color_mean = (0.485, 0.456, 0.406)
     color_std = (0.229, 0.224, 0.225)
@@ -27,16 +27,18 @@ def make_clipped_person(image, height, width):
     transformed_image, _ = DataTransform(475, color_mean, color_std)("val", image, dummy_annotation)
 
     psp_net = PSPNet(n_classes=2)
-    psp_net.load_state_dict(torch.load("segmentation/weights/pspnet50_2_20.pth"))  # weight
+    psp_net.load_state_dict(torch.load("segmentation/weights/pspnet50_2_20.pth")) # weight
+    psp_net.to(device)
     psp_net.eval()
     dummy_image = torch.zeros(3, 475, 475)
     transformed_image = torch.stack((transformed_image, dummy_image), 0)
+    transformed_image = transformed_image.to(device)
     _, annotation = psp_net(transformed_image)
     annotation = annotation[0]
 
     numpy_image = image.convert('RGBA')
     numpy_image = np.array(numpy_image)
-    annotation = annotation.detach().numpy()
+    annotation = annotation.to('cpu').detach().numpy()
     annotation = np.argmax(annotation, axis=0)
     annotation = annotation * 255
     annotation = Image.fromarray(np.uint8(annotation)).convert('L')
