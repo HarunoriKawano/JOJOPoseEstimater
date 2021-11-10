@@ -44,13 +44,16 @@ def cv2pil(image):
 
 if __name__ == '__main__':
     # Initial values
-    image_path = "data/test.jpg"
-    image_height_scale = 1080
+    image_path = "data/test4.jpg"
+    image_height_scale = 720
+
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    print(f'use device: {device}')
 
     image = cv2.imread(image_path)
     image = scale_to_width(image, image_height_scale)
     height, width = image.shape[:2]
     image = cv2pil(image)
-    person_image = F.make_clipped_person(image, height, width)
+    person_image = F.make_clipped_person(image, height, width, device)
 
     person_image.save('test.png')
