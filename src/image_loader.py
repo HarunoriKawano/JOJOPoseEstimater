@@ -14,43 +14,34 @@ LABELS = ["Buccellati", "Dio", "Giorno", "Highway-Star", "Jo-suke", "Jo-taro",
             "Kakyoin", "Kira", "Kishibe", "Polnareff", "Trish"]
 
 
-def data_loder(root_path, phase, im_rows, im_cols):
+def data_loder(root_path, phase):
     """ path以下の画像を読み込む
 
     Parameters:
+        root_path(list): ルートパス
         phase(str): 'train'または'test', 訓練か検証を指定
-        im_rows(int): imageの縦幅
-        im_cols(int): imageの横幅
 
     Returns:
-        imgs(Tensor): imageを格納したリスト
-            (label数(11)*各labelごとのimage, im_rows, im_cols, 3)
+        img_path_list(Tensor): imageのpathを格納したリスト
+            (label数(11)*各labelごとのimage, )
         labels(Tensor): labelを格納したリスト 
             (label数(11)*各labelごとのimage, )
     """
 
-    imgs = []
+    img_path_list = []
     labels = []
 
     root_dir = root_path + "/images/" + phase
 
     for i,label in enumerate(LABELS):
-        files = glob.glob(root_dir + "/" + label + "/*.jpg")
+        files = glob.glob(root_dir + "/" + label + "/*.png")
         #  random.shuffle(files)
         #  各ファイルを処理
-        num = 0
         for f in files:
-            num += 1
-            # 画像ファイルを読む
-            img = Image.open(f)
-            img = img.convert("RGB") #  色空間をRGBに
-            img = img.resize((im_rows, im_cols)) # サイズ変更
-            img = np.asarray(img)
-            img = img/255#  正規化
-            imgs.append(img)
+            img_path_list.append(f)
             labels.append(i)
 
-    return torch.tensor(imgs), torch.tensor(labels)
+    return img_path_list, torch.tensor(labels)
 
 
 class PreprocessJOJO(data.Dataset):
@@ -62,23 +53,27 @@ class PreprocessJOJO(data.Dataset):
         ・イメージの高さ,幅(int)
     """
 
-    def __init__(self, imgs, labels, phase, transform=None):
+    def __init__(self, img_path_list, labels, phase, im_rows, im_cols, transform=None):
         """
         Parameters:
-            imgs(Tensor): imageを格納したリスト
+            img_path_list(list): imageのpathを格納したリスト
             labels(Tensor): labelを格納したリスト
             phase(str): 'train'または'test', 訓練か検証を指定
+            im_rows(int): imageの縦幅
+            im_cols(int): imageの横幅
             transform(object): 前処理クラスDataTransform(ある場合は指定)
         """
-        self.imgs = imgs
+        self.img_path_list = img_path_list
         self.labels = labels
         self.phase = phase
+        self.im_rows = im_rows
+        self.im_cols = im_cols
         self.transform = transform
 
     def __len__(self):
         """imageの数を返す
         """
-        return len(self.imgs)
+        return len(self.img_path_list)
 
     def __getitem__(self, index):
         """ データの数だけイテレート
@@ -108,8 +103,13 @@ class PreprocessJOJO(data.Dataset):
             width(int): imageの横幅
         """
 
-        #  image取得
-        img = self.imgs[index]
+        # 画像ファイルを読む
+        img = Image.open(self.img_path_list[index])
+        img = img.convert("RGB") #  色空間をRGBに
+        img = img.resize((self.im_rows, self.im_cols)) # サイズ変更
+        img = np.asarray(img)
+        img = torch.tensor(img)
+        img = img/255#  正規化
         img = img.permute(2,0,1).float()
         height, width, _ = img.shape
         label = self.labels[index].long()
@@ -126,17 +126,17 @@ if __name__ == "__main__":
     im_cols = 256
 
     #  Dataを取得
-    train_imgs, train_labels = data_loder("train", im_rows, im_cols)
-    valid_imgs, valid_labels = data_loder("valid", im_rows, im_cols)
+    train_img_path_list, train_labels = data_loder("train")
+    valid_img_path_list, valid_labels = data_loder("valid")
 
     #  Datasetを作成
-    tr_data = PreprocessJOJO(train_imgs, train_labels, "train")
-    val_data = PreprocessJOJO(valid_imgs, valid_labels, "valid")
+    tr_data = PreprocessJOJO(train_img_path_list, train_labels, "train", im_rows, im_cols)
+    val_data = PreprocessJOJO(valid_img_path_list, valid_labels, "valid", im_rows, im_cols)
     print('訓練データのサイズ: ', tr_data.__len__())
     print('検証データのサイズ: ', val_data.__len__())
 
     #  DataLorderを作成
-    batch_size = 4
+    batch_size = 12
     tr_batch = data.DataLoader(
         tr_data,                #  訓練用data
         batch_size = batch_size,#  ミニバッチのサイズ
