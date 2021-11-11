@@ -5,7 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from segmentation import function as seg_F
-from ditection import function as src_F
+from detection import function as src_F
 
 
 def scale_to_width(img, height=640):
