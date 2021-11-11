@@ -93,7 +93,7 @@ class PSPLoss(nn.Module):
 
 
 if __name__ == '__main__':
-    net = PSPNet(21)
+    net = PSPNet(2)
     batch_size = 8
     torchinfo.summary(net,
                       input_size=(batch_size, 3, 475, 475))

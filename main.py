@@ -5,7 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 from segmentation import function as seg_F
-from src import function as src_F
+from ditection import function as src_F
 
 
 def scale_to_width(img, height=640):
@@ -45,7 +45,7 @@ def cv2pil(image):
 
 if __name__ == '__main__':
     # Initial values
-    image_path = "data/test4.jpg"
+    image_path = "data/test5.jpg"
     image_height_scale = 720
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
