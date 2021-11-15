@@ -1,60 +1,76 @@
 import torch
-from PIL import Image
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
+import opencv_functions as cvF
 
 from segmentation import function as seg_F
-from detection import function as src_F
+from movie import MovieCreator
 
 
-def scale_to_width(img, height=640):
-    """
-    Resize the image by specifying the width and keeping the image ratio fixed.
-    Parameters
-    ----------
-    img: input image
-        cv2 image
-    height: Specifying the width
-        int
+def image_synthesis(target, back, top_x, top_y, alpha):
+    height, width = target.shape[:2]
+    if back.ndim == 4:
+        back = cv2.cvtColor(back, cv2.COLOR_RGBA2RGB)
+    if target.ndim == 3:
+        target = cv2.cvtColor(target, cv2.COLOR_RGB2RGBA)
 
-    Returns
-    -------
-    dst: resized image
-        cv2 image
-    """
-    h, w = img.shape[:2]
-    width = round(w * (height / h))
-    dst = cv2.resize(img, dsize=(width, height))
+    mask = target[:, :, 3]
+    mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+    mask = mask / 255 * alpha
 
-    return dst
+    target = target[:, :, :3]
+    back = back.astype(np.float64)
+    target = target.astype(np.float64)
 
+    back[top_y:height+top_y:, top_x:width+top_x] *= 1 - mask
+    back[top_y:height+top_y:, top_x:width+top_x] += target * mask
 
-def cv2pil(image):
-    """ OpenCV型 -> PIL型 """
-    new_image = image.copy()
-    if new_image.ndim == 2:  # モノクロ
-        pass
-    elif new_image.shape[2] == 3:  # カラー
-        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
-    elif new_image.shape[2] == 4:  # 透過
-        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
-    new_image = Image.fromarray(new_image)
-    return new_image
+    return back.astype(np.uint8)
 
 
 if __name__ == '__main__':
     # Initial values
-    image_path = "data/test5.jpg"
-    image_height_scale = 720
+    image_path = "data/test6.jpg"
+    while True:
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            raise Exception
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print(f'use device: {device}')
+        while True:
+            ret, frame = cap.read()
+            cv2.imshow('frame', frame)
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('c'):
+                image = frame.copy()
+                cap.release()
+                cv2.destroyAllWindows()
+                break
 
-    image = cv2.imread(image_path)
-    image = scale_to_width(image, image_height_scale)
-    height, width = image.shape[:2]
-    image = cv2pil(image)
-    person_image = seg_F.make_clipped_person(image, height, width, device)
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        print(f'use device: {device}')
 
-    person_image.save('test.png')
+        image = cv2.imread(image_path)
+        height, width = image.shape[:2]
+        person_image = seg_F.make_clipped_person(image, height, width, device)
+
+        cv2.imshow("person", cvF.scale_to_height(person_image, 500))
+        key = cv2.waitKey(0)
+        if key == ord('y'):
+            cv2.destroyAllWindows()
+            break
+
+    person_image = cvF.scale_to_height(person_image, 1000)
+    cv2.imwrite('cutting.png', person_image)
+
+    name = input('Enter your name: ')
+
+    detection_result = 0  # detection result
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video = cv2.VideoWriter('ImgVideo.mp4', fourcc, 30.0, (1920, 1080))
+
+    mv = MovieCreator(video, person_image, detection_result, name, 4, maxparam=False)
+    video, last_picture = mv.forward()
+
+    video.release()
+    cv2.imwrite('test.png', last_picture)
