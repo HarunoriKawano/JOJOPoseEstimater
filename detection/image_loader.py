@@ -3,11 +3,16 @@
 
 import numpy as np
 import pandas as pd
-from PIL import Image
+import matplotlib.pyplot as plt
+import cv2
 import os, glob, random
 
 import torch
 import torch.utils.data as data
+
+from detection.augmentations import Compose, ConvertFromInts, RandomBrightness,\
+    RandomContrast, ConvertColor, RandomSaturation, RandomHue, RandomLightingNoise,\
+    SwapChannels, PhotometricDistort, Expand, RandomMirror, Resize, SubtractMeans
 
 
 LABELS = ["Buccellati", "Dio", "Giorno", "Highway-Star", "Jo-suke", "Jo-taro",
@@ -42,6 +47,45 @@ def data_loder(root_path, phase):
             labels.append(i)
 
     return img_path_list, torch.tensor(labels)
+
+class DataTransform(object):
+    ''' データの前処理クラス
+
+    イメージのサイズをリサイズ
+    訓練時には拡張処理を行う
+
+    Attributes:
+        data_transform(dict): 前処理メソッドを格納した辞書
+    '''
+
+    def __init__(self, im_rows, im_cols, color_mean):
+
+        self.transform = {
+            'train':Compose([
+                ConvertFromInts(),
+                PhotometricDistort(),
+                Expand(color_mean),
+                RandomMirror(),
+                Resize(im_rows, im_cols),
+                SubtractMeans(color_mean)
+            ]),
+            'valid':Compose([
+                ConvertFromInts(),
+                Resize(im_rows, im_cols),
+                SubtractMeans(color_mean)
+            ])
+        }
+
+    def __call__(self, img, phase, label, cast_integer=False):
+        '''データの前処理を実施
+           DataTransformのインスタンスから実行される
+        
+        Parameters:
+          img(Image): イメージ
+          phase(str): 'train'または'val'
+          label (Tensor): 正解ラベルのインデックス
+        '''
+        return self.transform[phase](img, label, cast_integer)
 
 
 class PreprocessJOJO(data.Dataset):
@@ -97,41 +141,112 @@ class PreprocessJOJO(data.Dataset):
             index(int): imageのindex
 
         Returns:
-            img(Tensor): 前処理後のimage(im_rows, im_cols, 3)
+            img(Tensor): 前処理後のimage(3, im_rows, im_cols)
             label(str): 正解label
             height(int): imageの縦幅
             width(int): imageの横幅
         """
 
         # 画像ファイルを読む
-        img = Image.open(self.img_path_list[index])
-        img = img.convert("RGB") #  色空間をRGBに
-        img = img.resize((self.im_rows, self.im_cols)) # サイズ変更
-        img = np.asarray(img)
-        img = torch.tensor(img)
-        img = img/255#  正規化
-        img = img.permute(2,0,1).float()
+        img = cv2.imread(self.img_path_list[index])
+
+        # DataTransformで前処理を実施
+        img, label = self.transform(
+            img,               # OpneCV2で読み込んだイメージデータ
+            self.phase,        # 'train'または'valid'
+            self.labels[index])  # 正解ラベルのインデックス
+
+        img = torch.from_numpy(
+            img[:, :, (2, 1, 0)]).permute(2, 0, 1)
+
         height, width, _ = img.shape
         label = self.labels[index].long()
-
-        #  image前処理
-        #  img, label = self.transform(img, self.phase)
 
         return img, label, height, width
 
 
 if __name__ == "__main__":
 
-    im_rows = 256
-    im_cols = 256
+    im_rows = 1024
+    im_cols = 1024
+    color_mean = (132, 140, 144) #  BGR
 
     #  Dataを取得
-    train_img_path_list, train_labels = data_loder("train")
-    valid_img_path_list, valid_labels = data_loder("valid")
+    train_img_path_list, train_labels = data_loder("..","train")
+    valid_img_path_list, valid_labels = data_loder("..","valid")
+
+
+    test_path = train_img_path_list[0]
+    test_label = train_labels[0]
+    img = cv2.imread(test_path)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    transform = DataTransform(im_rows, im_cols, color_mean)
+    phase = 'train'
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    print(img_transformed.shape)
+    exit()
+
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    test_path = train_img_path_list[1]
+    test_label = train_labels[1]
+    img = cv2.imread(test_path)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    transform = DataTransform(im_rows, im_cols, color_mean)
+    phase = 'train'
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    test_path = train_img_path_list[2]
+    test_label = train_labels[2]
+    img = cv2.imread(test_path)
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    transform = DataTransform(im_rows, im_cols, color_mean)
+    phase = 'train'
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+    img_transformed, label = transform(img, phase, test_label, cast_integer=True)
+    plt.imshow(cv2.cvtColor(img_transformed, cv2.COLOR_BGR2RGB))
+    plt.show()
+    
+    exit()
 
     #  Datasetを作成
-    tr_data = PreprocessJOJO(train_img_path_list, train_labels, "train", im_rows, im_cols)
-    val_data = PreprocessJOJO(valid_img_path_list, valid_labels, "valid", im_rows, im_cols)
+    tr_data = PreprocessJOJO(train_img_path_list, train_labels, "train", transform=transform)
+    val_data = PreprocessJOJO(valid_img_path_list, valid_labels, "valid", transform=transform)
     print('訓練データのサイズ: ', tr_data.__len__())
     print('検証データのサイズ: ', val_data.__len__())
 

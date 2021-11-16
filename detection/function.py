@@ -1,18 +1,31 @@
+
+import cv2
 import torch
+import torch.nn as nn
+from torchvision import models
+import numpy as np
 
-from detection import models
-
+from detection.image_loader import DataTransform
 
 def inference(image):
-    vgg = models.make_vgg16()
 
-    vgg_weights = torch.load('../weights/vgg16_reducedfc.pth')
-    vgg.load_state_dict(vgg_weights)
+    #   モデルのインスタンス作成
+    net = models.vgg16(pretrained=False)
+    net.classifier[6] = nn.Linear(in_features=4096, out_features=11)
+    #  vggモデルの学習済みの重みを適用
+    net_weights = torch.load('detection/weights/jojo_weights15.pth', map_location=torch.device('cpu'))
+    net.load_state_dict(net_weights)
 
-    dense = models.make_dense(11)
+    #  image 前処理
+    # DataTransformで前処理を実施
+    im_rows = 300
+    im_cols = 300
+    color_mean = (132, 140, 144) #  BGR
+    transform = DataTransform(im_rows, im_cols, color_mean)
+    image, label = transform(image, 'valid', 0)
+    image = torch.from_numpy(image[:, :, (2, 1, 0)]).permute(2, 0, 1)
+    image = torch.unsqueeze(image, 0)
 
-    result = vgg(image)
-    result = result.view(result.size(0), -1)
-    out = dense(result)
+    output = net(image)
 
-    return out
+    return output.data.max(1)[1].item()
