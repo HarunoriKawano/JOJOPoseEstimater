@@ -6,6 +6,7 @@ import moviepy.editor as mp
 
 import opencv_functions as cvF
 from segmentation import function as seg_F
+from detection import function as det_F
 from movie import MovieCreator
 
 
@@ -35,10 +36,11 @@ if __name__ == '__main__':
     output_dir = "data/output/"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    image_path = "data/test.jpg"
+    image_path = "data/test4.jpg"
     max_param = False
     fps = 30.0
     movie_time = 4
+    LABELS = ["Buccellati","Dio","Giorno","Highway-Star","Jo-suke","Jo-taro","Kakyoin","Kira","Kishibe","Polnareff","Trish"]
 
     while True:
         cap = cv2.VideoCapture(0)
@@ -72,7 +74,8 @@ if __name__ == '__main__':
     name = input('Enter your name: ')
     cvF.imwrite(f'{output_dir}{name}_cutting.png', person_image)
 
-    detection_result = 1  # detection result
+    # detection_result = 1  # detection result
+    detection_result = det_F.inference(image, device)
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video = cv2.VideoWriter(f'{output_dir}{name}.mp4', fourcc, fps, (1920, 1080))

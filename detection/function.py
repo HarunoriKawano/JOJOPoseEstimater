@@ -1,4 +1,3 @@
-
 import cv2
 import torch
 import torch.nn as nn
@@ -7,8 +6,8 @@ import numpy as np
 
 from detection.image_loader import DataTransform
 
-def inference(image, device):
 
+def inference(image, device):
     #   モデルのインスタンス作成
     net = models.vgg16(pretrained=False)
     net.classifier[6] = nn.Linear(in_features=4096, out_features=11)
@@ -20,7 +19,7 @@ def inference(image, device):
     # DataTransformで前処理を実施
     im_rows = 300
     im_cols = 300
-    color_mean = (132, 140, 144) #  BGR
+    color_mean = (132, 140, 144)  # BGR
     transform = DataTransform(im_rows, im_cols, color_mean)
     image, label = transform(image, 'valid', 0)
     image = torch.from_numpy(image[:, :, (2, 1, 0)]).permute(2, 0, 1)
