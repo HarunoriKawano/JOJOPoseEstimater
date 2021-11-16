@@ -11,9 +11,10 @@ class MovieCreator:
     stand_information = [
         {'name': 'スティッキーフィンガーズ', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
          'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
-         'person_scale': 1000, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255)}
+         'person_scale': 1000, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255),
+         'stand_scale_width': False, 'stand_scale': 1000}
     ]
-    font_path = "C:/Windows/Fonts/yumindb.ttf"
+    font_path = "data/yumindb.ttf"
 
     def __init__(self, video, person_image, detection_result, name, movie_time, maxparam=False):
         self.video = video
@@ -27,6 +28,12 @@ class MovieCreator:
             self.stand_image[index] = 0
         self.name = name
         self.stand = self.stand_information[detection_result]
+        if self.stand['stand_scale_width']:
+            self.stand_image = cvF.scale_to_width(self.stand_image, self.stand['stand_scale'])
+        else:
+            self.stand_image = cvF.scale_to_height(self.stand_image, self.stand['stand_scale'])
+        self.movie_time = movie_time
+
         if self.stand['person_scale_width']:
             self.person_image = cvF.scale_to_width(person_image, self.stand['person_scale'])
         else:

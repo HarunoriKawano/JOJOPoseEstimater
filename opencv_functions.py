@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+import os
 
 
 def scale_to_height(img, height=720):
@@ -134,3 +135,19 @@ def cv2_putText(text, back, org, font_path, font_size, color=(255, 255, 255), ed
 
     image = np.array(image)
     return image
+
+
+def imwrite(filename, img, params=None):
+    try:
+        ext = os.path.splitext(filename)[1]
+        result, n = cv2.imencode(ext, img, params)
+
+        if result:
+            with open(filename, mode='w+b') as f:
+                n.tofile(f)
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False

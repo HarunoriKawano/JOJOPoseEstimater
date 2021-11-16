@@ -1,8 +1,10 @@
 import torch
 import numpy as np
 import cv2
-import opencv_functions as cvF
+import os
+import moviepy.editor as mp
 
+import opencv_functions as cvF
 from segmentation import function as seg_F
 from movie import MovieCreator
 
@@ -30,7 +32,10 @@ def image_synthesis(target, back, top_x, top_y, alpha):
 
 if __name__ == '__main__':
     # Initial values
-    image_path = "data/test4.jpg"
+    output_dir = "data/output/"
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+    image_path = "data/test.jpg"
     max_param = False
     fps = 30.0
     movie_time = 4
@@ -64,17 +69,19 @@ if __name__ == '__main__':
             cv2.destroyAllWindows()
             break
 
-    cv2.imwrite('cutting.png', person_image)
-
     name = input('Enter your name: ')
+    cvF.imwrite(f'{output_dir}{name}_cutting.png', person_image)
 
     detection_result = 0  # detection result
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video = cv2.VideoWriter('ImgVideo.mp4', fourcc, fps, (1920, 1080))
+    video = cv2.VideoWriter(f'{output_dir}{name}.mp4', fourcc, fps, (1920, 1080))
 
     mv = MovieCreator(video, person_image, detection_result, name, movie_time, maxparam=max_param)
     video, last_picture = mv.forward()
 
     video.release()
-    cv2.imwrite('test.png', last_picture)
+    cvF.imwrite(f'{output_dir}{name}_jojo.png', last_picture)
+
+    clip = mp.VideoFileClip(f'{output_dir}{name}.mp4').subclip()
+    clip.write_videofile(f'{output_dir}{name}2.mp4', audio=f'data/sound/{str(detection_result)}.mp3')
