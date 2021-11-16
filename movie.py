@@ -12,18 +12,23 @@ class MovieCreator:
         {'name': 'スティッキーフィンガーズ', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
          'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
          'person_scale': 1000, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255),
-         'stand_scale_width': False, 'stand_scale': 1000}
+         'stand_scale_width': False, 'stand_scale': 1000},
+
+        {'name': 'ザ・ワールド', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
+         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
+         'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 700}
     ]
     font_path = "data/yumindb.ttf"
 
     def __init__(self, video, person_image, detection_result, name, movie_time, maxparam=False):
         self.video = video
         self.back_ground = cv2.imread(f'data/back_ground/{str(detection_result)}.jpg')
-        self.stand_image = cv2.imread(f'data/stand/{str(detection_result)}.png')
+        self.stand_image = cv2.imread(f'data/stand/{str(detection_result)}.jpg')
         if self.stand_image.ndim == 3:
             mask = self.stand_image.copy()
             mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
-            index = np.where(np.logical_or(mask == 0, mask == 255))
+            index = np.where(mask == 255)
             self.stand_image = cv2.cvtColor(self.stand_image, cv2.COLOR_RGB2RGBA)
             self.stand_image[index] = 0
         self.name = name
@@ -91,7 +96,7 @@ class MovieCreator:
                                         font_path=self.font_path, font_size=60,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
-                stand_limit = round(len(stand_title) * (i-half_time) / half_time)
+                stand_limit = round(len(stand_title) * (i - half_time) / half_time)
                 stand_text = self.stand['name'][:stand_limit]
                 movie = cvF.cv2_putText(stand_text, movie, org=(40, 120),
                                         font_path=self.font_path, font_size=110,
@@ -101,9 +106,9 @@ class MovieCreator:
                 font = ImageFont.truetype(self.font_path, 110)
                 draw_dummy = ImageDraw.Draw(image)
                 w, h = draw_dummy.textsize(self.name, font)
-                person_limit = round(len(self.name) * (i-half_time) / half_time)
+                person_limit = round(len(self.name) * (i - half_time) / half_time)
                 person_text = self.name[:person_limit]
-                movie = cvF.cv2_putText(person_text, movie, org=(1790-w, 850),
+                movie = cvF.cv2_putText(person_text, movie, org=(1790 - w, 850),
                                         font_path=self.font_path, font_size=110,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
