@@ -9,26 +9,36 @@ from PIL import Image, ImageDraw, ImageFont
 
 class MovieCreator:
     stand_information = [
-        {'name': 'スティッキーフィンガーズ', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
-         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
-         'person_scale': 1000, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255),
-         'stand_scale_width': False, 'stand_scale': 1000},
+        {'name': 'スティッキーフィンガーズ', 'top_x': 1100, 'top_y': 20, 'person_top_x': 1050, 'person_top_y': 80,
+         'move_x': 80, 'move_y': 0, 'person_move_x': -135, 'person_move_y': 10, 'person_scale_width': False,
+         'person_scale': 990, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255),
+         'stand_scale_width': False, 'stand_scale': 990},
 
         {'name': 'ザ・ワールド', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
          'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
          'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
-         'stand_scale_width': False, 'stand_scale': 700}
+         'stand_scale_width': False, 'stand_scale': 700},
+
+        {'name': 'ゴールド・エクスペリエンス', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
+         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
+         'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 700},
+
+        {'name': 'ゴールド・エクスペリエンス', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
+         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
+         'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 700},
     ]
     font_path = "data/yumindb.ttf"
 
     def __init__(self, video, person_image, detection_result, name, movie_time, maxparam=False):
         self.video = video
         self.back_ground = cv2.imread(f'data/back_ground/{str(detection_result)}.jpg')
-        self.stand_image = cv2.imread(f'data/stand/{str(detection_result)}.jpg')
+        self.stand_image = cv2.imread(f'data/stand/{str(detection_result)}.png')
         if self.stand_image.ndim == 3:
             mask = self.stand_image.copy()
             mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
-            index = np.where(mask == 255)
+            index = np.where(mask == 0)
             self.stand_image = cv2.cvtColor(self.stand_image, cv2.COLOR_RGB2RGBA)
             self.stand_image[index] = 0
         self.name = name
@@ -78,38 +88,38 @@ class MovieCreator:
             if i < half_time:
                 stand_limit = round(len(stand_title) * i / half_time)
                 stand_text = stand_title[:stand_limit]
-                movie = cvF.cv2_putText(stand_text, movie, org=(80, 20),
-                                        font_path=self.font_path, font_size=60,
+                movie = cvF.cv2_putText(stand_text, movie, org=(80, 70),
+                                        font_path=self.font_path, font_size=50,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
                 person_limit = round(len(person_title) * i / half_time)
                 person_text = person_title[:person_limit]
                 movie = cvF.cv2_putText(person_text, movie, org=(1250, 750),
-                                        font_path=self.font_path, font_size=60,
+                                        font_path=self.font_path, font_size=50,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
             else:
-                movie = cvF.cv2_putText(stand_title, movie, org=(80, 20),
-                                        font_path=self.font_path, font_size=60,
+                movie = cvF.cv2_putText(stand_title, movie, org=(80, 70),
+                                        font_path=self.font_path, font_size=50,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
                 movie = cvF.cv2_putText(person_title, movie, org=(1250, 750),
-                                        font_path=self.font_path, font_size=60,
+                                        font_path=self.font_path, font_size=50,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
                 stand_limit = round(len(stand_title) * (i - half_time) / half_time)
                 stand_text = self.stand['name'][:stand_limit]
-                movie = cvF.cv2_putText(stand_text, movie, org=(40, 120),
-                                        font_path=self.font_path, font_size=110,
+                movie = cvF.cv2_putText(stand_text, movie, org=(40, 170),
+                                        font_path=self.font_path, font_size=80,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
                 image = Image.fromarray(movie)
-                font = ImageFont.truetype(self.font_path, 110)
+                font = ImageFont.truetype(self.font_path, 80)
                 draw_dummy = ImageDraw.Draw(image)
                 w, h = draw_dummy.textsize(self.name, font)
                 person_limit = round(len(self.name) * (i - half_time) / half_time)
                 person_text = self.name[:person_limit]
-                movie = cvF.cv2_putText(person_text, movie, org=(1790 - w, 850),
-                                        font_path=self.font_path, font_size=110,
+                movie = cvF.cv2_putText(person_text, movie, org=(1730 - w, 850),
+                                        font_path=self.font_path, font_size=80,
                                         color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
             self.video.write(movie)

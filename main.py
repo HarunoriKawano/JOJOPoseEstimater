@@ -25,8 +25,8 @@ def image_synthesis(target, back, top_x, top_y, alpha):
     back = back.astype(np.float64)
     target = target.astype(np.float64)
 
-    back[top_y:height+top_y:, top_x:width+top_x] *= 1 - mask
-    back[top_y:height+top_y:, top_x:width+top_x] += target * mask
+    back[top_y:height + top_y:, top_x:width + top_x] *= 1 - mask
+    back[top_y:height + top_y:, top_x:width + top_x] += target * mask
 
     return back.astype(np.uint8)
 
@@ -36,11 +36,12 @@ if __name__ == '__main__':
     output_dir = "data/output/"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    image_path = "data/test4.jpg"
+    image_path = "data/test2.jpg"
     max_param = False
     fps = 30.0
     movie_time = 4
-    LABELS = ["Buccellati","Dio","Giorno","Highway-Star","Jo-suke","Jo-taro","Kakyoin","Kira","Kishibe","Polnareff","Trish"]
+    LABELS = ["Buccellati", "Dio", "Giorno", "Highway-Star", "Jo-suke", "Jo-taro", "Kakyoin", "Kira", "Kishibe",
+              "Polnareff", "Trish"]
 
     while True:
         cap = cv2.VideoCapture(0)
@@ -74,8 +75,9 @@ if __name__ == '__main__':
     name = input('Enter your name: ')
     cvF.imwrite(f'{output_dir}{name}_cutting.png', person_image)
 
-    # detection_result = 1  # detection result
     detection_result = det_F.inference(image, device)
+    detection_result = 0  # detection result
+    print(detection_result, LABELS[detection_result])
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video = cv2.VideoWriter(f'{output_dir}{name}.mp4', fourcc, fps, (1920, 1080))
