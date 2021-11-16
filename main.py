@@ -30,7 +30,11 @@ def image_synthesis(target, back, top_x, top_y, alpha):
 
 if __name__ == '__main__':
     # Initial values
-    image_path = "data/test6.jpg"
+    image_path = "data/test4.jpg"
+    max_param = False
+    fps = 30.0
+    movie_time = 4
+
     while True:
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
@@ -49,7 +53,8 @@ if __name__ == '__main__':
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print(f'use device: {device}')
 
-        image = cv2.imread(image_path)
+        image = cv2.imread(image_path)  # test
+
         height, width = image.shape[:2]
         person_image = seg_F.make_clipped_person(image, height, width, device)
 
@@ -59,7 +64,6 @@ if __name__ == '__main__':
             cv2.destroyAllWindows()
             break
 
-    person_image = cvF.scale_to_height(person_image, 1000)
     cv2.imwrite('cutting.png', person_image)
 
     name = input('Enter your name: ')
@@ -67,9 +71,9 @@ if __name__ == '__main__':
     detection_result = 0  # detection result
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video = cv2.VideoWriter('ImgVideo.mp4', fourcc, 30.0, (1920, 1080))
+    video = cv2.VideoWriter('ImgVideo.mp4', fourcc, fps, (1920, 1080))
 
-    mv = MovieCreator(video, person_image, detection_result, name, 4, maxparam=False)
+    mv = MovieCreator(video, person_image, detection_result, name, movie_time, maxparam=max_param)
     video, last_picture = mv.forward()
 
     video.release()

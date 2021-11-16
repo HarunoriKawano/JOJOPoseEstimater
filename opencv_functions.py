@@ -70,26 +70,67 @@ def image_synthesis(target, back, top_x, top_y, alpha):
     return back.astype(np.uint8)
 
 
-def pil2cv(imgPIL):
-    imgCV_RGB = np.array(imgPIL, dtype=np.uint8)
-    imgCV_BGR = np.array(imgCV_RGB)[:, :, ::-1]
-    return imgCV_BGR
+def toRGBA(image):
+    if image.ndim == 3:
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
+    return image
 
 
-def cv2pil(imgCV):
-    imgCV_RGB = imgCV[:, :, ::-1]
-    imgPIL = Image.fromarray(imgCV_RGB)
-    return imgPIL
+def cv2_putText(text, back, org, font_path, font_size, color=(255, 255, 255), edge_color=(255, 255, 255)):
+    x1, y1 = org
+    r, g, b = color
+    color = (b, g, r, 255)
+    r, g, b = edge_color
+    edge_color = (b, g, r, 255)
+    font = ImageFont.truetype(font_path, font_size)
 
+    image = Image.fromarray(back)
+    draw_dummy = ImageDraw.Draw(image)  # 描画用のDraw関数をダミーで用意（テキストサイズ計測用）
+    w, h = draw_dummy.textsize(text, font)
 
-def cv2_putText(img, text, org, fontFace, fontScale, color):
-    x, y = org
-    b, g, r = color
-    colorRGB = (r, g, b)
-    imgPIL = cv2pil(img)
-    draw = ImageDraw.Draw(imgPIL)
-    fontPIL = ImageFont.truetype(font=fontFace, size=fontScale)
-    w, h = draw.textsize(text, font=fontPIL)
-    draw.text(xy=(x, y - h), text=text, fill=colorRGB, font=fontPIL)
-    imgCV = pil2cv(imgPIL)
-    return imgCV
+    if w == 0:
+        return back
+    img_bgd = Image.fromarray(back[y1:y1+h, x1:x1+w])
+    draw = ImageDraw.Draw(img_bgd)
+
+    draw.text((0, 0), text, font=font, fill=(255, 255, 255, 255))
+
+    pad = int(h * 0.2)
+    img_bgd = cv2.copyMakeBorder(np.array(img_bgd), pad, pad, pad, pad, cv2.BORDER_CONSTANT, 0)
+
+    kernel = np.ones((5, 5), np.uint8)
+    img_bgd = cv2.dilate(img_bgd, kernel, iterations=2)
+
+    alpha = np.full((img_bgd.shape[0], img_bgd.shape[1]), 255, dtype=img_bgd.dtype)
+    b, g, r = cv2.split(img_bgd)
+    img_bgd = cv2.merge((b, g, r, alpha))
+
+    color_lower = np.array([255, 255, 255, 255])
+    color_upper = np.array([255, 255, 255, 255])
+
+    mask = cv2.inRange(img_bgd, color_lower, color_upper)
+
+    img_bgd[np.where((img_bgd[:, :, :3] == (255, 255, 255)).all(axis=2))] = edge_color
+
+    img_bgd = np.array(img_bgd)
+    bool = cv2.bitwise_and(img_bgd, img_bgd, mask=mask)
+
+    bool = cv2.GaussianBlur(bool, (33, 33), 0)
+
+    bool = Image.fromarray(bool)
+    draw = ImageDraw.Draw(bool)
+    draw.text((pad, pad), text, font=font, fill=color)
+    bool = np.array(bool)
+
+    w_bgd = img_bgd.shape[1]
+    h_bgd = img_bgd.shape[0]
+    x2 = x1 + w_bgd
+    y2 = y1 + h_bgd
+
+    image = np.array(image)
+
+    image[y1:y2, x1:x2, :3] = image[y1:y2, x1:x2] * (1 - bool[:, :, 3:] / 255) + \
+                            bool[:, :, :3] * (bool[:, :, 3:] / 255)
+
+    image = np.array(image)
+    return image

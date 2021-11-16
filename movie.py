@@ -4,28 +4,34 @@ from matplotlib import pyplot as plt
 import io
 import tqdm
 import opencv_functions as cvF
+from PIL import Image, ImageDraw, ImageFont
 
 
 class MovieCreator:
     stand_information = [
         {'name': 'スティッキーフィンガーズ', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
-         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0}
+         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
+         'person_scale': 1000, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255)}
     ]
+    font_path = "C:/Windows/Fonts/yumindb.ttf"
 
     def __init__(self, video, person_image, detection_result, name, movie_time, maxparam=False):
         self.video = video
-        self.person_image = person_image
         self.back_ground = cv2.imread(f'data/back_ground/{str(detection_result)}.jpg')
-        self.stand = cv2.imread(f'data/stand/{str(detection_result)}.png')
-        if self.stand.ndim == 3:
-            mask = self.stand.copy()
+        self.stand_image = cv2.imread(f'data/stand/{str(detection_result)}.png')
+        if self.stand_image.ndim == 3:
+            mask = self.stand_image.copy()
             mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
             index = np.where(np.logical_or(mask == 0, mask == 255))
-            self.stand = cv2.cvtColor(self.stand, cv2.COLOR_RGB2RGBA)
-            self.stand[index] = 0
+            self.stand_image = cv2.cvtColor(self.stand_image, cv2.COLOR_RGB2RGBA)
+            self.stand_image[index] = 0
         self.name = name
+        self.stand = self.stand_information[detection_result]
+        if self.stand['person_scale_width']:
+            self.person_image = cvF.scale_to_width(person_image, self.stand['person_scale'])
+        else:
+            self.person_image = cvF.scale_to_height(person_image, self.stand['person_scale'])
         self.movie_time = movie_time
-        self.detection_result = detection_result
         if maxparam:
             self.param = np.array([5, 5, 5, 5, 5, 5])
         else:
@@ -33,11 +39,10 @@ class MovieCreator:
 
     def forward(self):
         iteration = 30 * self.movie_time
-        stand_information = self.stand_information[self.detection_result]
-        stand_plus_x = stand_information['move_x'] / iteration
-        stand_plus_y = stand_information['move_y'] / iteration
-        person_plus_x = stand_information['person_move_x'] / iteration
-        person_plus_y = stand_information['person_move_y'] / iteration
+        stand_plus_x = self.stand['move_x'] / iteration
+        stand_plus_y = self.stand['move_y'] / iteration
+        person_plus_x = self.stand['person_move_x'] / iteration
+        person_plus_y = self.stand['person_move_y'] / iteration
         half_time = iteration / 2
         stand_title = '[STAND NAME]'
         person_title = '[STAND MASTER]'
@@ -45,34 +50,55 @@ class MovieCreator:
         for i in tqdm.tqdm(range(iteration)):
             stand_alpha = i / iteration if i / iteration <= 1.0 else 1.0
             person_alpha = i * 4 / iteration if i * 4 / iteration <= 1.0 else 1.0
-            movie = cvF.image_synthesis(self.stand, self.back_ground,
-                                        stand_information['top_x'] + stand_plus_x * i,
-                                        stand_information['top_y'] + stand_plus_y * i,
+            movie = cvF.image_synthesis(self.stand_image, self.back_ground,
+                                        self.stand['top_x'] + stand_plus_x * i,
+                                        self.stand['top_y'] + stand_plus_y * i,
                                         stand_alpha)
+
             movie = cvF.image_synthesis(self.person_image, movie,
-                                        stand_information['person_top_x'] + person_plus_x * i,
-                                        stand_information['person_top_y'] + person_plus_y * i,
+                                        self.stand['person_top_x'] + person_plus_x * i,
+                                        self.stand['person_top_y'] + person_plus_y * i,
                                         person_alpha)
-            radar_chart = self.make_radar_chart(iteration, i, 750, '#0000ff')
-            movie = cvF.image_synthesis(radar_chart, movie, 0, 330, 1)
+
+            radar_chart = self.make_radar_chart(iteration, i, 700, self.stand['figure_color'])
+            movie = cvF.image_synthesis(radar_chart, movie, 0, 380, 1)
+
             if i < half_time:
                 stand_limit = round(len(stand_title) * i / half_time)
                 stand_text = stand_title[:stand_limit]
-                movie = cvF.cv2_putText(movie, stand_text, org=(100, 100), fontFace="C:/Windows/Fonts/msgothic.ttc",
-                                        fontScale=50,
-                                        color=(255, 0, 0))
+                movie = cvF.cv2_putText(stand_text, movie, org=(80, 20),
+                                        font_path=self.font_path, font_size=60,
+                                        color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
+
                 person_limit = round(len(person_title) * i / half_time)
                 person_text = person_title[:person_limit]
-                movie = cvF.cv2_putText(movie, person_text, org=(1000, 100), fontFace="C:/Windows/Fonts/msgothic.ttc",
-                                        fontScale=50,
-                                        color=(255, 0, 0))
+                movie = cvF.cv2_putText(person_text, movie, org=(1250, 750),
+                                        font_path=self.font_path, font_size=60,
+                                        color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
             else:
-                movie = cvF.cv2_putText(movie, stand_title, org=(100, 100), fontFace="C:/Windows/Fonts/msgothic.ttc",
-                                        fontScale=50,
-                                        color=(255, 0, 0))
-                movie = cvF.cv2_putText(movie, person_title, org=(1000, 100), fontFace="C:/Windows/Fonts/msgothic.ttc",
-                                        fontScale=50,
-                                        color=(255, 0, 0))
+                movie = cvF.cv2_putText(stand_title, movie, org=(80, 20),
+                                        font_path=self.font_path, font_size=60,
+                                        color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
+
+                movie = cvF.cv2_putText(person_title, movie, org=(1250, 750),
+                                        font_path=self.font_path, font_size=60,
+                                        color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
+
+                stand_limit = round(len(stand_title) * (i-half_time) / half_time)
+                stand_text = self.stand['name'][:stand_limit]
+                movie = cvF.cv2_putText(stand_text, movie, org=(40, 120),
+                                        font_path=self.font_path, font_size=110,
+                                        color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
+
+                image = Image.fromarray(movie)
+                font = ImageFont.truetype(self.font_path, 110)
+                draw_dummy = ImageDraw.Draw(image)
+                w, h = draw_dummy.textsize(self.name, font)
+                person_limit = round(len(self.name) * (i-half_time) / half_time)
+                person_text = self.name[:person_limit]
+                movie = cvF.cv2_putText(person_text, movie, org=(1790-w, 850),
+                                        font_path=self.font_path, font_size=110,
+                                        color=self.stand['text_color'], edge_color=self.stand['text_edge_color'])
 
             self.video.write(movie)
         return self.video, movie
