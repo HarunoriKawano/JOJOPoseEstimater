@@ -7,13 +7,13 @@ import numpy as np
 
 from detection.image_loader import DataTransform
 
-def inference(image):
+def inference(image, device):
 
     #   モデルのインスタンス作成
     net = models.vgg16(pretrained=False)
     net.classifier[6] = nn.Linear(in_features=4096, out_features=11)
     #  vggモデルの学習済みの重みを適用
-    net_weights = torch.load('detection/weights/jojo_weights15.pth', map_location=torch.device('cpu'))
+    net_weights = torch.load('detection/weights/jojo_weights15.pth', map_location=torch.device(device))
     net.load_state_dict(net_weights)
 
     #  image 前処理
