@@ -14,20 +14,55 @@ class MovieCreator:
          'person_scale': 990, 'figure_color': 'blue', 'text_color': (255, 255, 255), 'text_edge_color': (0, 255, 255),
          'stand_scale_width': False, 'stand_scale': 990},
 
-        {'name': 'ザ・ワールド', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
-         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
-         'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
-         'stand_scale_width': False, 'stand_scale': 700},
+        {'name': 'ザ・ワールド', 'top_x': 1020, 'top_y': 45, 'person_top_x': 885, 'person_top_y': 150,
+         'move_x': 130, 'move_y': -45, 'person_move_x': -125, 'person_move_y': 35, 'person_scale_width': False,
+         'person_scale': 895, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 970},
 
-        {'name': 'ゴールド・エクスペリエンス', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
-         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
-         'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
-         'stand_scale_width': False, 'stand_scale': 700},
+        {'name': 'ゴールド・エクスペリエンス', 'top_x': 1280, 'top_y': 0, 'person_top_x': 855, 'person_top_y': 65,
+         'move_x': -80, 'move_y': 0, 'person_move_x': 60, 'person_move_y': 5, 'person_scale_width': False,
+         'person_scale': 990, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 1040},
 
-        {'name': 'ゴールド・エクスペリエンス', 'top_x': 700, 'top_y': 70, 'person_top_x': 700, 'person_top_y': 70,
-         'move_x': 620, 'move_y': -50, 'person_move_x': 500, 'person_move_y': 0, 'person_scale_width': False,
+        {'name': 'ハイウェイ・スター', 'top_x': 1135, 'top_y': 105, 'person_top_x': 835, 'person_top_y': 50,
+         'move_x': 0, 'move_y': 0, 'person_move_x': 0, 'person_move_y': 0, 'person_scale_width': False,
+         'person_scale': 1020, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 914},
+
+         {'name': 'クレイジー・ダイヤモンド', 'top_x': 800, 'top_y': 10, 'person_top_x': 915, 'person_top_y': 90,
+         'move_x': 400, 'move_y': 0, 'person_move_x': -90, 'person_move_y': 5, 'person_scale_width': False,
+         'person_scale': 980, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 1060},
+
+         {'name': 'スタープラチナ', 'top_x': 735, 'top_y': 10, 'person_top_x': 1290, 'person_top_y': 120,
+         'move_x': 0, 'move_y': 0, 'person_move_x': 0, 'person_move_y': 0, 'person_scale_width': False,
+         'person_scale': 960, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 900},
+
+         {'name': 'ハイエロファント・グリーン', 'top_x': 800, 'top_y': 30, 'person_top_x': 1540, 'person_top_y': 80,
+         'move_x': 85, 'move_y': 20, 'person_move_x': -195, 'person_move_y': 0, 'person_scale_width': False,
          'person_scale': 1000, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
-         'stand_scale_width': False, 'stand_scale': 700},
+         'stand_scale_width': False, 'stand_scale': 780},
+
+         {'name': 'キラークイーン', 'top_x': 690, 'top_y': 60, 'person_top_x': 690, 'person_top_y': 150,
+         'move_x': 450, 'move_y': -45, 'person_move_x': 205, 'person_move_y': 5, 'person_scale_width': False,
+         'person_scale': 890, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 970},
+
+         {'name': 'ヘブンズドア', 'top_x': 910, 'top_y': 70, 'person_top_x': 930, 'person_top_y': 30,
+         'move_x': 420, 'move_y': -70, 'person_move_x': 120, 'person_move_y': 25, 'person_scale_width': False,
+         'person_scale': 1025, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 720},
+
+         {'name': 'シルバー・チャリオッツ', 'top_x': 810, 'top_y': 30, 'person_top_x': 785, 'person_top_y': 40,
+         'move_x': 475, 'move_y': -30, 'person_move_x': 245, 'person_move_y': 25, 'person_scale_width': False,
+         'person_scale': 1015, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 1050},
+
+         {'name': 'スパイス・ガール', 'top_x': 930, 'top_y': 0, 'person_top_x': 830, 'person_top_y': 45,
+         'move_x': 525, 'move_y': 30, 'person_move_x': 190, 'person_move_y': 95, 'person_scale_width': False,
+         'person_scale': 940, 'figure_color': '#FFD700', 'text_color': (255, 215, 0), 'text_edge_color': (255, 255, 0),
+         'stand_scale_width': False, 'stand_scale': 1050},
     ]
     font_path = "data/yumindb.ttf"
 
@@ -141,7 +176,7 @@ class MovieCreator:
         ax.spines['polar'].set_color('gray')
         ax.spines['polar'].set_linewidth(5.0)
         ax.spines['polar'].set_zorder(1)
-        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels, fontname="UD Digi Kyokasho N-B",
+        ax.set_thetagrids(angles[:-1] * 180 / np.pi, labels, fontname="Hiragino Sans",
                           fontsize=20, color="black", zorder=2)
         ax.set_rgrids([])
         ax.set_theta_zero_location("N")
@@ -156,7 +191,7 @@ class MovieCreator:
 
         for i, value in enumerate(param):
             text = str_rgrids[round(value)]
-            ax.text(x=i * np.pi / 3, y=6, s=text, fontsize=25, fontname='Franklin Gothic Medium',
+            ax.text(x=i * np.pi / 3, y=6, s=text, fontsize=25, fontname='Hiragino Sans',
                     horizontalalignment="center", verticalalignment='center')
 
         ax.set_rlim([min(rgrids), max(rgrids)])
