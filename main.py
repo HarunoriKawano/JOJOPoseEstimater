@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import os
 import moviepy.editor as mp
+from mutagen.mp3 import MP3
 
 import opencv_functions as cvF
 from segmentation import function as seg_F
@@ -36,10 +37,9 @@ if __name__ == '__main__':
     output_dir = "data/output/"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    image_path = "data/test2.jpg"
+    image_path = "data/sample.jpg"
     max_param = False
     fps = 30.0
-    movie_time = 4
     LABELS = ["Buccellati", "Dio", "Giorno", "Highway-Star", "Jo-suke", "Jo-taro", "Kakyoin", "Kira", "Kishibe",
               "Polnareff", "Trish"]
 
@@ -76,8 +76,11 @@ if __name__ == '__main__':
     cvF.imwrite(f'{output_dir}{name}_cutting.png', person_image)
 
     detection_result = det_F.inference(image, device)
-    detection_result = 0  # detection result
     print(detection_result, LABELS[detection_result])
+    conf = input('confirmation: ')
+    if conf != "y":
+        detection_result = int(conf)
+    movie_time = MP3(f'data/sound/{str(detection_result)}.mp3').info.length
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     video = cv2.VideoWriter(f'{output_dir}{name}.mp4', fourcc, fps, (1920, 1080))
