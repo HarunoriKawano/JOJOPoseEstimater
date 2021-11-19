@@ -215,4 +215,4 @@ class MovieCreator:
             index = np.where(mask == 255)
             dst = cv2.cvtColor(dst, cv2.COLOR_RGB2RGBA)
             dst[index] = 0
-        return dst  # cvF.scale_to_height(dst, height=size)
+        return dst

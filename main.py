@@ -37,9 +37,10 @@ if __name__ == '__main__':
     output_dir = "data/output/"
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    image_path = "data/a.jpg"
+    image_path = "data/ta.jpg"
     max_param = False
     fps = 30.0
+
     LABELS = ["Buccellati", "Dio", "Giorno", "Highway-Star", "Jo-suke", "Jo-taro", "Kakyoin", "Kira", "Kishibe",
               "Polnareff", "Trish"]
 
