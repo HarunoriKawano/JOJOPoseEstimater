@@ -9,8 +9,9 @@ import numpy as np
 
 
 class Compose(object):
-    """引数transformに格納された変形を順番に実行するクラス
-       対象画像とアノテーション画像を同時に変換させます。 
+    """
+    引数transformに格納された変形を順番に実行するクラス
+    対象画像とアノテーション画像を同時に変換
     """
 
     def __init__(self, transforms):
@@ -132,19 +133,14 @@ class Normalize_Tensor(object):
 
     def __call__(self, img, anno_class_img):
 
-        # PIL画像をTensorに。大きさは最大1に規格化される
         img = transforms.functional.to_tensor(img)
 
         # 色情報の標準化
         img = transforms.functional.normalize(
             img, self.color_mean, self.color_std)
 
-        # アノテーション画像をNumpyに変換
         anno_class_img = np.array(anno_class_img)  # [高さ][幅]
 
-        # 'ambigious'には255が格納されているので、0の背景にしておく
-
-        # アノテーション画像をTensorに
         anno_class_img = torch.from_numpy(anno_class_img)
 
         return img, anno_class_img

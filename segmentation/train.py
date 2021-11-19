@@ -1,13 +1,12 @@
-import torch.utils.data as data
-import torch
-from torch import nn
-import math
 import time
 import pandas as pd
+import torch
+import torch.utils.data as data
 import torch_optimizer as optim
+from torch import nn
 
-from segmentation.data_loader import make_datapath_list, DataTransform, VOCDataset
 from segmentation.PSPNet import PSPNet, PSPLoss
+from segmentation.data_loader import make_datapath_list, DataTransform, VOCDataset
 
 
 # make a function to train the model

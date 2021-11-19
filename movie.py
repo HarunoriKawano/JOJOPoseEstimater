@@ -1,5 +1,4 @@
 import cv2
-import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 import io
