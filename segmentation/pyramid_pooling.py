@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-import copy
 
 from segmentation.conv2D_batch_norm import conv2DBatchNormRelu
 

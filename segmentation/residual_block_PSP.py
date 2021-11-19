@@ -1,5 +1,3 @@
-from torch import nn
-
 from segmentation.conv2D_batch_norm import *
 
 
