@@ -65,7 +65,6 @@ class DataTransform(object):
                 ConvertFromInts(),
                 PhotometricDistort(),
                 Expand(color_mean),
-                RandomMirror(),
                 Resize(im_rows, im_cols),
                 SubtractMeans(color_mean)
             ]),
